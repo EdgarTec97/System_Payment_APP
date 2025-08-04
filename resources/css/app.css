@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+/* Custom styles */
+.btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded;
+}
+
+.btn-secondary {
+    @apply bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded;
+}
+
+.btn-success {
+    @apply bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded;
+}
+
+.btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded;
+}
+
+.btn-warning {
+    @apply bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded;
+}
+
+.card {
+    @apply bg-white shadow-lg rounded-lg;
+}
+
+.card-header {
+    @apply bg-gray-50 px-6 py-4 border-b border-gray-200;
+}
+
+.card-body {
+    @apply p-6;
+}
+
+.form-control {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+}
+
+.table {
+    @apply w-full divide-y divide-gray-200;
+}
+
+.table th {
+    @apply px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+}
+
+.table td {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
+}
+
+.pagination {
+    @apply flex justify-center space-x-1;
+}
+
+.page-link {
+    @apply px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700;
+}
+
+.page-item.active .page-link {
+    @apply bg-blue-600 border-blue-600 text-white;
+}
+
+.alert {
+    @apply p-4 mb-4 text-sm rounded-lg;
+}
+
+.alert-success {
+    @apply text-green-800 bg-green-50 border border-green-200;
+}
+
+.alert-danger {
+    @apply text-red-800 bg-red-50 border border-red-200;
+}
+
+.alert-warning {
+    @apply text-yellow-800 bg-yellow-50 border border-yellow-200;
+}
+
+.alert-info {
+    @apply text-blue-800 bg-blue-50 border border-blue-200;
+}
+
