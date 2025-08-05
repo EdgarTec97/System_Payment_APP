@@ -19,6 +19,7 @@ class CheckPermission
             return redirect()->route('login');
         }
 
+        /** @var \App\Models\User $user */
         $user = auth()->user();
 
         // Check if user has the required permission
@@ -29,4 +30,3 @@ class CheckPermission
         return $next($request);
     }
 }
-

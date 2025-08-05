@@ -43,4 +43,3 @@ class ClearOrderCache extends Command
         return Command::SUCCESS;
     }
 }
-

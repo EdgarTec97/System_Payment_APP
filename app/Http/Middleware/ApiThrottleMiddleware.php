@@ -30,9 +30,9 @@ class ApiThrottleMiddleware
 
             if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
                 $this->logThrottleEvent($request, $identifier, $tier, $maxAttempts);
-                
+
                 $retryAfter = RateLimiter::availableIn($key);
-                
+
                 return response()->json([
                     'error' => 'Too Many Requests',
                     'message' => "Rate limit exceeded for {$tier} tier. Try again in {$retryAfter} seconds.",
@@ -48,7 +48,7 @@ class ApiThrottleMiddleware
 
         // Add rate limit headers to response
         $response = $next($request);
-        
+
         return $this->addRateLimitHeaders($response, $identifier, $limitsConfig);
     }
 
@@ -115,7 +115,7 @@ class ApiThrottleMiddleware
         // Add headers for the most restrictive limit (minute)
         $minuteConfig = $limitsConfig['minute'];
         $key = "api_throttle:minute:{$identifier}";
-        
+
         $maxAttempts = $minuteConfig['max_attempts'];
         $remainingAttempts = $maxAttempts - RateLimiter::attempts($key);
         $resetTime = now()->addMinutes($minuteConfig['decay_minutes'])->timestamp;
@@ -205,7 +205,7 @@ class ApiThrottleMiddleware
     public static function getBanExpiry(string $identifier): ?int
     {
         $banKey = "api_ban:{$identifier}";
-        
+
         if (Cache::has($banKey)) {
             // This is an approximation since Redis doesn't directly expose TTL in Laravel Cache
             return now()->addMinutes(5)->timestamp; // Minimum ban duration
@@ -214,4 +214,3 @@ class ApiThrottleMiddleware
         return null;
     }
 }
-

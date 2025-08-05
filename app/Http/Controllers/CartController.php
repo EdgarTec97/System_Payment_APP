@@ -71,10 +71,9 @@ class CartController extends Controller
                     'formatted_total_price' => $item->formatted_total_price,
                 ],
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error al agregar el producto al carrito.',
@@ -137,10 +136,9 @@ class CartController extends Controller
                     'items_count' => $cart->fresh()->items_count,
                 ],
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error al actualizar la cantidad.',
@@ -178,10 +176,9 @@ class CartController extends Controller
                     'items_count' => $cart->fresh()->items_count,
                 ],
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error al eliminar el producto.',
@@ -208,10 +205,9 @@ class CartController extends Controller
                 'success' => true,
                 'message' => 'Carrito vaciado.',
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error al vaciar el carrito.',
@@ -225,7 +221,7 @@ class CartController extends Controller
     public function count()
     {
         $cart = $this->getCurrentCart();
-        
+
         return response()->json([
             'count' => $cart ? $cart->items_count : 0,
         ]);
@@ -240,19 +236,19 @@ class CartController extends Controller
 
         if ($cart->items()->count() === 0) {
             return redirect()->route('cart.index')
-                           ->withErrors(['cart' => 'Tu carrito está vacío.']);
+                ->withErrors(['cart' => 'Tu carrito está vacío.']);
         }
 
         // Validate stock for all items
         foreach ($cart->items as $item) {
             if (!$item->product || !$item->product->isAvailable()) {
                 return redirect()->route('cart.index')
-                               ->withErrors(['cart' => "El producto '{$item->product_title}' ya no está disponible."]);
+                    ->withErrors(['cart' => "El producto '{$item->product_title}' ya no está disponible."]);
             }
 
             if (!$item->hasEnoughStock()) {
                 return redirect()->route('cart.index')
-                               ->withErrors(['cart' => "No hay suficiente stock para '{$item->product_title}'."]);
+                    ->withErrors(['cart' => "No hay suficiente stock para '{$item->product_title}'."]);
             }
         }
 
@@ -287,8 +283,7 @@ class CartController extends Controller
     private function getCurrentCart(): ?Order
     {
         return Order::where('user_id', Auth::id())
-                   ->where('status', 'draft')
-                   ->first();
+            ->where('status', 'draft')
+            ->first();
     }
 }
-

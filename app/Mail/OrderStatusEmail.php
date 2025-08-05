@@ -91,4 +91,3 @@ class OrderStatusEmail extends Mailable implements ShouldQueue
         return $labels[$status] ?? ucfirst($status);
     }
 }
-

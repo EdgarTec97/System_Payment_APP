@@ -59,4 +59,3 @@ class SendVerificationEmail implements ShouldQueue
         ]);
     }
 }
-

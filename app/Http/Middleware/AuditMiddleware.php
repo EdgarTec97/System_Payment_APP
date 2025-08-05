@@ -69,13 +69,13 @@ class AuditMiddleware
     private function getControllerAction(Request $request): ?string
     {
         $route = $request->route();
-        
+
         if (!$route) {
             return null;
         }
 
         $action = $route->getAction();
-        
+
         if (isset($action['controller'])) {
             return $action['controller'];
         }
@@ -254,4 +254,3 @@ class AuditMiddleware
         }
     }
 }
-

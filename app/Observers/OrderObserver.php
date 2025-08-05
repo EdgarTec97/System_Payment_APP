@@ -21,7 +21,7 @@ class OrderObserver
     public function created(Order $order): void
     {
         $this->clearRelevantCache($order, 'created');
-        
+
         // Cache the order if it's not a draft
         if ($order->status !== 'draft') {
             $this->cacheService->cacheOrder($order);
@@ -37,13 +37,13 @@ class OrderObserver
     public function updated(Order $order): void
     {
         $this->clearRelevantCache($order, 'updated');
-        
+
         // Handle cart vs order caching
         if ($order->status === 'draft') {
             $this->cacheService->cacheUserCart($order->user_id, $order);
         } else {
             $this->cacheService->cacheOrder($order);
-            
+
             // If status changed from draft, clear cart cache
             if ($order->wasChanged('status') && $order->getOriginal('status') === 'draft') {
                 $this->cacheService->cacheUserCart($order->user_id, null);
@@ -58,7 +58,7 @@ class OrderObserver
     {
         $this->clearRelevantCache($order, 'deleted');
         $this->cacheService->forgetOrder($order->id);
-        
+
         // Clear cart cache if it was a draft
         if ($order->status === 'draft') {
             $this->cacheService->cacheUserCart($order->user_id, null);
@@ -81,7 +81,7 @@ class OrderObserver
     {
         $this->clearRelevantCache($order, 'force_deleted');
         $this->cacheService->forgetOrder($order->id);
-        
+
         if ($order->status === 'draft') {
             $this->cacheService->cacheUserCart($order->user_id, null);
         }
@@ -135,7 +135,6 @@ class OrderObserver
                 'status' => $order->status,
                 'changed_attributes' => $order->getChanges(),
             ]);
-
         } catch (\Exception $e) {
             Log::error('Failed to clear order cache after model change', [
                 'order_id' => $order->id,
@@ -146,4 +145,3 @@ class OrderObserver
         }
     }
 }
-

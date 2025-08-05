@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Product;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class ProductCacheService
 {
@@ -33,10 +34,10 @@ class ProductCacheService
 
         return Cache::tags([self::CACHE_TAG])->remember($cacheKey, self::CACHE_TTL, function () use ($limit) {
             return Product::with(['primaryImage'])
-                         ->active()
-                         ->orderBy('created_at', 'desc')
-                         ->take($limit)
-                         ->get();
+                ->active()
+                ->orderBy('created_at', 'desc')
+                ->take($limit)
+                ->get();
         });
     }
 
@@ -49,11 +50,11 @@ class ProductCacheService
 
         return Cache::tags([self::CACHE_TAG])->remember($cacheKey, self::CACHE_TTL, function () use ($limit) {
             return Product::with(['primaryImage'])
-                         ->active()
-                         ->where('discount', '>', 0)
-                         ->orderBy('discount', 'desc')
-                         ->take($limit)
-                         ->get();
+                ->active()
+                ->where('discount', '>', 0)
+                ->orderBy('discount', 'desc')
+                ->take($limit)
+                ->get();
         });
     }
 
@@ -66,11 +67,11 @@ class ProductCacheService
 
         return Cache::tags([self::CACHE_TAG])->remember($cacheKey, self::CACHE_TTL, function () use ($category, $limit) {
             return Product::with(['primaryImage'])
-                         ->active()
-                         ->where('metadata->category', $category)
-                         ->orderBy('created_at', 'desc')
-                         ->take($limit)
-                         ->get();
+                ->active()
+                ->where('metadata->category', $category)
+                ->orderBy('created_at', 'desc')
+                ->take($limit)
+                ->get();
         });
     }
 
@@ -104,7 +105,7 @@ class ProductCacheService
                 'low_stock_products' => Product::lowStock()->count(),
                 'out_of_stock_products' => Product::where('stock', 0)->count(),
                 'average_price' => Product::active()->avg('final_price'),
-                'total_stock_value' => Product::active()->sum(\DB::raw('stock * final_price')),
+                'total_stock_value' => Product::active()->sum(column: DB::raw('stock * final_price')),
             ];
         });
     }
@@ -118,11 +119,11 @@ class ProductCacheService
 
         return Cache::tags([self::CACHE_TAG])->remember($cacheKey, 1800, function () use ($query, $limit) { // 30 minutes for search
             return Product::with(['primaryImage'])
-                         ->active()
-                         ->search($query)
-                         ->orderBy('created_at', 'desc')
-                         ->take($limit)
-                         ->get();
+                ->active()
+                ->search($query)
+                ->orderBy('created_at', 'desc')
+                ->take($limit)
+                ->get();
         });
     }
 
@@ -135,15 +136,15 @@ class ProductCacheService
 
         return Cache::tags([self::CACHE_TAG])->remember($cacheKey, self::CACHE_TTL, function () use ($product, $limit) {
             $query = Product::with(['primaryImage'])
-                           ->active()
-                           ->where('id', '!=', $product->id);
+                ->active()
+                ->where('id', '!=', $product->id);
 
             // Try to find products in the same category first
             if (isset($product->metadata['category'])) {
                 $related = $query->where('metadata->category', $product->metadata['category'])
-                                ->inRandomOrder()
-                                ->take($limit)
-                                ->get();
+                    ->inRandomOrder()
+                    ->take($limit)
+                    ->get();
 
                 if ($related->count() >= $limit) {
                     return $related;
@@ -161,7 +162,7 @@ class ProductCacheService
     public function cacheProduct(Product $product): void
     {
         $cacheKey = self::CACHE_PREFIX . "single:{$product->id}";
-        
+
         Cache::tags([self::CACHE_TAG])->put($cacheKey, $product->load(['images', 'primaryImage']), self::CACHE_TTL);
     }
 
@@ -226,13 +227,13 @@ class ProductCacheService
         try {
             // Cache active products
             $this->getActiveProducts();
-            
+
             // Cache featured products
             $this->getFeaturedProducts();
-            
+
             // Cache price range
             $this->getPriceRange();
-            
+
             // Cache statistics
             $this->getProductStatistics();
 
@@ -242,4 +243,3 @@ class ProductCacheService
         }
     }
 }
-

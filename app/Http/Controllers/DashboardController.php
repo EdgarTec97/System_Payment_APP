@@ -24,8 +24,9 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
-        
+
         $stats = [
             'total_orders' => $user->orders()->count(),
             'pending_orders' => $user->orders()->where('status', 'created')->count(),
@@ -34,10 +35,10 @@ class DashboardController extends Controller
         ];
 
         $recent_orders = $user->orders()
-                             ->with('items.product')
-                             ->latest()
-                             ->take(5)
-                             ->get();
+            ->with('items.product')
+            ->latest()
+            ->take(5)
+            ->get();
 
         return view('dashboard.index', compact('stats', 'recent_orders'));
     }
@@ -47,6 +48,7 @@ class DashboardController extends Controller
      */
     public function admin()
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
         if (!$user->hasRole('admin')) {
@@ -62,19 +64,19 @@ class DashboardController extends Controller
             'pending_orders' => Order::where('status', 'created')->count(),
             'total_revenue' => Order::where('status', '!=', 'cancelled')->sum('total'),
             'monthly_revenue' => Order::where('status', '!=', 'cancelled')
-                                     ->whereMonth('created_at', now()->month)
-                                     ->sum('total'),
+                ->whereMonth('created_at', now()->month)
+                ->sum('total'),
         ];
 
         $recent_orders = Order::with(['user', 'items.product'])
-                             ->latest()
-                             ->take(10)
-                             ->get();
+            ->latest()
+            ->take(10)
+            ->get();
 
         $recent_users = User::with('roles')
-                           ->latest()
-                           ->take(10)
-                           ->get();
+            ->latest()
+            ->take(10)
+            ->get();
 
         return view('dashboard.admin', compact('stats', 'recent_orders', 'recent_users'));
     }
@@ -84,6 +86,7 @@ class DashboardController extends Controller
      */
     public function support()
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
         if (!$user->hasRole('support') && !$user->hasRole('admin')) {
@@ -102,17 +105,16 @@ class DashboardController extends Controller
         ];
 
         $recent_orders = Order::with(['user', 'items.product'])
-                             ->latest()
-                             ->take(10)
-                             ->get();
+            ->latest()
+            ->take(10)
+            ->get();
 
         $low_stock_products = Product::where('stock', '<=', 5)
-                                    ->where('stock', '>', 0)
-                                    ->orderBy('stock')
-                                    ->take(10)
-                                    ->get();
+            ->where('stock', '>', 0)
+            ->orderBy('stock')
+            ->take(10)
+            ->get();
 
         return view('dashboard.support', compact('stats', 'recent_orders', 'low_stock_products'));
     }
 }
-

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Laravel\Sanctum\PersonalAccessToken;
 
 /**
  * @OA\Tag(
@@ -164,6 +165,7 @@ class AuthController extends Controller
             ], 401);
         }
 
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -203,7 +205,14 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+
+        /** @var PersonalAccessToken|null $token */
+        $token = $user?->currentAccessToken();
+
+        if ($token) {
+            $token->delete();   // Intelephense deja de quejarse
+        }
 
         return response()->json([
             'success' => true,

@@ -43,4 +43,3 @@ class RoleSeeder extends Seeder
         DB::table('roles')->insert($roles);
     }
 }
-

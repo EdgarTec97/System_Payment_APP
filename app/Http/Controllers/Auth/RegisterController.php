@@ -30,8 +30,8 @@ class RegisterController extends Controller
 
         if ($validator->fails()) {
             return redirect()->back()
-                           ->withErrors($validator)
-                           ->withInput();
+                ->withErrors($validator)
+                ->withInput();
         }
 
         $user = $this->create($request->all());
@@ -49,7 +49,7 @@ class RegisterController extends Controller
         event(new \App\Events\UserRegistered($user, $verification));
 
         return redirect()->route('login')
-                        ->with('success', 'Registro exitoso. Por favor verifica tu email antes de iniciar sesión.');
+            ->with('success', 'Registro exitoso. Por favor verifica tu email antes de iniciar sesión.');
     }
 
     /**
@@ -92,4 +92,3 @@ class RegisterController extends Controller
         ]);
     }
 }
-

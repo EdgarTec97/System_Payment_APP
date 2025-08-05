@@ -23,7 +23,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $query = Product::with(['images', 'primaryImage'])
-                       ->active();
+            ->active();
 
         // Apply filters
         if ($request->filled('search')) {
@@ -52,7 +52,7 @@ class ProductController extends Controller
         }
 
         $products = $query->paginate(config('app.pagination_per_page', 15))
-                         ->withQueryString();
+            ->withQueryString();
 
         // Get filter options for the view
         $priceRange = Cache::remember('products_price_range', 3600, function () {
@@ -93,7 +93,7 @@ class ProductController extends Controller
     public function search(Request $request)
     {
         $query = Product::with(['primaryImage'])
-                       ->active();
+            ->active();
 
         if ($request->filled('q')) {
             $query->search($request->q);
@@ -115,4 +115,3 @@ class ProductController extends Controller
         ]);
     }
 }
-

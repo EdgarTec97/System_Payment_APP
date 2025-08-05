@@ -1,0 +1,110 @@
+version: "3.8"
+
+services:
+    postgres:
+        container_name: postgres_${APP_NAME}
+        image: postgres:14.5-alpine
+        environment:
+            - POSTGRES_DB=${DB_DATABASE}
+            - POSTGRES_USER=${DB_USERNAME}
+            - POSTGRES_ROL=${DB_ROL}
+            - POSTGRES_PASSWORD=${DB_PASSWORD}
+            - PGDATA=/data/postgres
+        volumes:
+            - postgres:/data/postgres
+        ports:
+            - "${DB_PORT}:5432"
+        networks:
+            - users-api
+        restart: always
+
+    pgadmin:
+        container_name: pgadmin_${APP_NAME}
+        image: dpage/pgadmin4
+        environment:
+            PGADMIN_DEFAULT_EMAIL: ${ADMIN_DEFAULT_EMAIL}
+            PGADMIN_DEFAULT_PASSWORD: ${ADMIN_DEFAULT_PASSWORD}
+            PGADMIN_CONFIG_SERVER_MODE: "False"
+        volumes:
+            - pgadmin:/var/lib/pgadmin
+
+        ports:
+            - "${ADMIN_PORT}:80"
+        networks:
+            - users-api
+        restart: always
+
+    redis:
+        container_name: redis-${APP_NAME}
+        image: bitnami/redis:6.2.7
+        restart: always
+        environment:
+            - REDIS_PASSWORD=${REDIS_PASSWORD}
+            # - ALLOW_EMPTY_PASSWORD=yes
+        volumes:
+            - redis:/var/lib/redis
+            - redis-config:/usr/local/etc/redis/redis.conf
+        ports:
+            - ${REDIS_PORT}:6379
+        networks:
+            - users-api
+    redis-commander:
+        container_name: redis-commander-${APP_NAME}
+        image: rediscommander/redis-commander:latest
+        restart: always
+        environment:
+            REDIS_HOSTS: redis-${APP_NAME}
+            REDIS_HOST: redis-${APP_NAME}
+            REDIS_PORT: redis:${REDIS_PORT}
+            REDIS_PASSWORD: ${REDIS_PASSWORD}
+            HTTP_USER: ${REDIS_COMMANDER_USER}
+            HTTP_PASSWORD: ${REDIS_COMMANDER_PASSWORD}
+        ports:
+            - ${REDIS_COMMANDER_PORT}:8081
+        networks:
+            - users-api
+    zookeeper:
+        container_name: zookeeper-${APP_NAME}
+        image: "bitnami/zookeeper:3.8.0"
+        restart: always
+        ports:
+            - ${ZOOKEEPER_PORT}:2181
+        networks:
+            - users-api
+        volumes:
+            - kafka:/data/zookeeper
+        environment:
+            - ALLOW_ANONYMOUS_LOGIN=yes
+        logging:
+            driver: "local"
+            options:
+                max-size: 10m
+    kafka:
+        container_name: kafka_${APP_NAME}
+        image: "bitnami/kafka:3.1.0"
+        restart: always
+        ports:
+            - ${KAFKA_PORT}:9092
+        environment:
+            - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:${ZOOKEEPER_PORT}
+            - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka_${APP_NAME}:9092 # Replace kafka:9092 to localhost:9092 if you want to use app without docker
+            - ALLOW_PLAINTEXT_LISTENER=yes
+        networks:
+            - users-api
+        volumes:
+            - kafka:/data/kafka
+        logging:
+            driver: "local"
+            options:
+                max-size: 10m
+
+networks:
+    users-api:
+        driver: bridge
+
+volumes:
+    postgres:
+    kafka:
+    pgadmin:
+    redis:
+    redis-config:

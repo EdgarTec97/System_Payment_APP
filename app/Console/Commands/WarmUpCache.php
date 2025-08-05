@@ -76,4 +76,3 @@ class WarmUpCache extends Command
         }
     }
 }
-

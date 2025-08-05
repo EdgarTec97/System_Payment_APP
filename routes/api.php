@@ -37,7 +37,7 @@ Route::prefix('products')->group(function () {
 
 // Protected routes
 Route::middleware(['auth:sanctum', 'api.throttle:default'])->group(function () {
-    
+
     // Auth routes
     Route::prefix('auth')->group(function () {
         Route::post('logout', [AuthController::class, 'logout']);
@@ -77,7 +77,7 @@ Route::middleware(['auth:sanctum', 'api.throttle:default'])->group(function () {
 // Admin routes
 Route::middleware(['auth:sanctum', 'role:ADMIN', 'api.throttle:strict'])->group(function () {
     Route::prefix('admin')->group(function () {
-        
+
         // User management
         Route::prefix('users')->group(function () {
             Route::get('/', [AuthController::class, 'adminIndex']);
@@ -107,7 +107,7 @@ Route::middleware(['auth:sanctum', 'role:ADMIN', 'api.throttle:strict'])->group(
 // Support routes
 Route::middleware(['auth:sanctum', 'role:SUPPORT,ADMIN', 'api.throttle:lenient'])->group(function () {
     Route::prefix('support')->group(function () {
-        
+
         // Product management
         Route::prefix('products')->group(function () {
             Route::post('/', [ProductController::class, 'supportStore']);
@@ -131,4 +131,3 @@ Route::get('health', function () {
 Route::get('docs', function () {
     return redirect('/api/documentation');
 });
-

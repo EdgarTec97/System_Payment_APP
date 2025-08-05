@@ -16,7 +16,7 @@ class AuthTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create roles
         Role::create(['name' => 'ADMIN', 'display_name' => 'Administrator', 'description' => 'Administrator']);
         Role::create(['name' => 'SUPPORT', 'display_name' => 'Support', 'description' => 'Support']);
@@ -36,26 +36,26 @@ class AuthTest extends TestCase
         $response = $this->postJson('/api/auth/register', $userData);
 
         $response->assertStatus(201)
-                ->assertJsonStructure([
-                    'success',
-                    'message',
-                    'data' => [
-                        'user' => [
-                            'id',
-                            'name',
-                            'email',
-                            'phone',
-                            'created_at',
-                            'updated_at',
-                            'roles'
-                        ],
-                        'token'
-                    ]
-                ])
-                ->assertJson([
-                    'success' => true,
-                    'message' => 'User registered successfully'
-                ]);
+            ->assertJsonStructure([
+                'success',
+                'message',
+                'data' => [
+                    'user' => [
+                        'id',
+                        'name',
+                        'email',
+                        'phone',
+                        'created_at',
+                        'updated_at',
+                        'roles'
+                    ],
+                    'token'
+                ]
+            ])
+            ->assertJson([
+                'success' => true,
+                'message' => 'User registered successfully'
+            ]);
 
         $this->assertDatabaseHas('users', [
             'email' => $userData['email'],
@@ -73,15 +73,15 @@ class AuthTest extends TestCase
         $response = $this->postJson('/api/auth/register', []);
 
         $response->assertStatus(422)
-                ->assertJsonStructure([
-                    'success',
-                    'message',
-                    'errors'
-                ])
-                ->assertJson([
-                    'success' => false,
-                    'message' => 'Validation failed'
-                ]);
+            ->assertJsonStructure([
+                'success',
+                'message',
+                'errors'
+            ])
+            ->assertJson([
+                'success' => false,
+                'message' => 'Validation failed'
+            ]);
 
         // Test invalid email
         $response = $this->postJson('/api/auth/register', [
@@ -92,7 +92,7 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['email']);
+            ->assertJsonValidationErrors(['email']);
 
         // Test password confirmation mismatch
         $response = $this->postJson('/api/auth/register', [
@@ -103,7 +103,7 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['password']);
+            ->assertJsonValidationErrors(['password']);
     }
 
     public function test_user_can_login()
@@ -118,25 +118,25 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'success',
-                    'message',
-                    'data' => [
-                        'user' => [
-                            'id',
-                            'name',
-                            'email',
-                            'created_at',
-                            'updated_at',
-                            'roles'
-                        ],
-                        'token'
-                    ]
-                ])
-                ->assertJson([
-                    'success' => true,
-                    'message' => 'Login successful'
-                ]);
+            ->assertJsonStructure([
+                'success',
+                'message',
+                'data' => [
+                    'user' => [
+                        'id',
+                        'name',
+                        'email',
+                        'created_at',
+                        'updated_at',
+                        'roles'
+                    ],
+                    'token'
+                ]
+            ])
+            ->assertJson([
+                'success' => true,
+                'message' => 'Login successful'
+            ]);
     }
 
     public function test_user_cannot_login_with_invalid_credentials()
@@ -151,10 +151,10 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(401)
-                ->assertJson([
-                    'success' => false,
-                    'message' => 'Invalid credentials'
-                ]);
+            ->assertJson([
+                'success' => false,
+                'message' => 'Invalid credentials'
+            ]);
     }
 
     public function test_user_can_logout()
@@ -167,10 +167,10 @@ class AuthTest extends TestCase
         ])->postJson('/api/auth/logout');
 
         $response->assertStatus(200)
-                ->assertJson([
-                    'success' => true,
-                    'message' => 'Logout successful'
-                ]);
+            ->assertJson([
+                'success' => true,
+                'message' => 'Logout successful'
+            ]);
 
         // Verify token is deleted
         $this->assertDatabaseMissing('personal_access_tokens', [
@@ -189,24 +189,24 @@ class AuthTest extends TestCase
         ])->getJson('/api/auth/user');
 
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'success',
-                    'data' => [
-                        'id',
-                        'name',
-                        'email',
-                        'created_at',
-                        'updated_at',
-                        'roles'
-                    ]
-                ])
-                ->assertJson([
-                    'success' => true,
-                    'data' => [
-                        'id' => $user->id,
-                        'email' => $user->email
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'success',
+                'data' => [
+                    'id',
+                    'name',
+                    'email',
+                    'created_at',
+                    'updated_at',
+                    'roles'
+                ]
+            ])
+            ->assertJson([
+                'success' => true,
+                'data' => [
+                    'id' => $user->id,
+                    'email' => $user->email
+                ]
+            ]);
     }
 
     public function test_user_can_update_profile()
@@ -224,14 +224,14 @@ class AuthTest extends TestCase
         ])->putJson('/api/auth/profile', $updateData);
 
         $response->assertStatus(200)
-                ->assertJson([
-                    'success' => true,
-                    'message' => 'Profile updated successfully',
-                    'data' => [
-                        'name' => 'Updated Name',
-                        'phone' => '+1234567890'
-                    ]
-                ]);
+            ->assertJson([
+                'success' => true,
+                'message' => 'Profile updated successfully',
+                'data' => [
+                    'name' => 'Updated Name',
+                    'phone' => '+1234567890'
+                ]
+            ]);
 
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
@@ -256,10 +256,10 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                ->assertJson([
-                    'success' => true,
-                    'message' => 'Password changed successfully'
-                ]);
+            ->assertJson([
+                'success' => true,
+                'message' => 'Password changed successfully'
+            ]);
 
         // Verify password was changed
         $user->refresh();
@@ -282,10 +282,10 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJson([
-                    'success' => false,
-                    'message' => 'Current password is incorrect'
-                ]);
+            ->assertJson([
+                'success' => false,
+                'message' => 'Current password is incorrect'
+            ]);
     }
 
     public function test_unauthenticated_user_cannot_access_protected_routes()
@@ -312,10 +312,9 @@ class AuthTest extends TestCase
         ])->getJson('/api/auth/user');
 
         $response->assertStatus(200);
-        
+
         // Check rate limit headers are present
         $this->assertArrayHasKey('x-ratelimit-limit', $response->headers->all());
         $this->assertArrayHasKey('x-ratelimit-remaining', $response->headers->all());
     }
 }
-

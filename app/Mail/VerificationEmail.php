@@ -64,4 +64,3 @@ class VerificationEmail extends Mailable implements ShouldQueue
         return [];
     }
 }
-

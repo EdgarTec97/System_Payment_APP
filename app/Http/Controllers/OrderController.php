@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class OrderController extends Controller
 {
@@ -22,8 +23,8 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $query = Order::with(['items.product.primaryImage'])
-                     ->where('user_id', Auth::id())
-                     ->where('status', '!=', 'draft');
+            ->where('user_id', Auth::id())
+            ->where('status', '!=', 'draft');
 
         // Apply filters
         if ($request->filled('status')) {
@@ -59,8 +60,9 @@ class OrderController extends Controller
             $query->orderBy($sortBy, $sortOrder);
         }
 
-        $orders = $query->paginate(config('app.pagination_per_page', 15))
-                       ->withQueryString();
+        /** @var LengthAwarePaginator $orders */
+        $orders = $query->paginate(config('app.pagination_per_page', 15));
+        $orders->withQueryString();
 
         return view('orders.index', compact('orders'));
     }
@@ -92,7 +94,7 @@ class OrderController extends Controller
 
         if (!$order->canBeCancelled()) {
             return redirect()->back()
-                           ->withErrors(['error' => 'Esta orden no puede ser cancelada.']);
+                ->withErrors(['error' => 'Esta orden no puede ser cancelada.']);
         }
 
         try {
@@ -108,11 +110,10 @@ class OrderController extends Controller
             $order->updateStatus('cancelled');
 
             return redirect()->back()
-                           ->with('success', 'Orden cancelada exitosamente.');
-
+                ->with('success', 'Orden cancelada exitosamente.');
         } catch (\Exception $e) {
             return redirect()->back()
-                           ->withErrors(['error' => 'Error al cancelar la orden.']);
+                ->withErrors(['error' => 'Error al cancelar la orden.']);
         }
     }
 
@@ -128,18 +129,17 @@ class OrderController extends Controller
 
         if (!$order->canBeDeleted()) {
             return redirect()->back()
-                           ->withErrors(['error' => 'Solo se pueden eliminar órdenes canceladas.']);
+                ->withErrors(['error' => 'Solo se pueden eliminar órdenes canceladas.']);
         }
 
         try {
             $order->delete();
 
             return redirect()->route('orders.index')
-                           ->with('success', 'Orden eliminada exitosamente.');
-
+                ->with('success', 'Orden eliminada exitosamente.');
         } catch (\Exception $e) {
             return redirect()->back()
-                           ->withErrors(['error' => 'Error al eliminar la orden.']);
+                ->withErrors(['error' => 'Error al eliminar la orden.']);
         }
     }
 
@@ -156,7 +156,7 @@ class OrderController extends Controller
         // Only allow invoice download for paid orders
         if (!$order->isPaid()) {
             return redirect()->back()
-                           ->withErrors(['error' => 'Solo se pueden descargar facturas de órdenes pagadas.']);
+                ->withErrors(['error' => 'Solo se pueden descargar facturas de órdenes pagadas.']);
         }
 
         $order->load(['items.product', 'user']);
@@ -178,12 +178,12 @@ class OrderController extends Controller
         ]);
 
         $order = Order::where('order_number', $request->order_number)
-                     ->where('user_id', Auth::id())
-                     ->first();
+            ->where('user_id', Auth::id())
+            ->first();
 
         if (!$order) {
             return redirect()->back()
-                           ->withErrors(['order_number' => 'Número de orden no encontrado.']);
+                ->withErrors(['order_number' => 'Número de orden no encontrado.']);
         }
 
         return redirect()->route('orders.show', $order);
@@ -207,4 +207,3 @@ class OrderController extends Controller
         return response()->json($stats);
     }
 }
-

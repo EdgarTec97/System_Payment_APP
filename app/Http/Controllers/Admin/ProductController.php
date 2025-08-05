@@ -6,6 +6,7 @@ use App\Http\Controllers\Support\ProductController as SupportProductController;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ProductController extends SupportProductController
 {
@@ -79,8 +80,9 @@ class ProductController extends SupportProductController
             $query->orderBy($sortBy, $sortOrder);
         }
 
-        $products = $query->paginate(config('app.pagination_per_page', 15))
-                         ->withQueryString();
+        /** @var LengthAwarePaginator $products */
+        $products = $query->paginate(config('app.pagination_per_page', 15));
+        $products->withQueryString();
 
         return view('admin.products.index', compact('products'));
     }
@@ -102,10 +104,10 @@ class ProductController extends SupportProductController
 
         // Get activity log
         $activities = $product->activities()
-                             ->with('causer')
-                             ->latest()
-                             ->take(20)
-                             ->get();
+            ->with('causer')
+            ->latest()
+            ->take(20)
+            ->get();
 
         return view('admin.products.show', compact('product', 'activities'));
     }
@@ -131,7 +133,7 @@ class ProductController extends SupportProductController
             // Check if product has orders
             if ($product->orderItems()->exists()) {
                 return redirect()->back()
-                               ->withErrors(['error' => 'No se puede eliminar permanentemente el producto porque tiene órdenes asociadas.']);
+                    ->withErrors(['error' => 'No se puede eliminar permanentemente el producto porque tiene órdenes asociadas.']);
             }
 
             // Delete all images
@@ -146,11 +148,10 @@ class ProductController extends SupportProductController
             $this->clearProductCache();
 
             return redirect()->route('admin.products.index')
-                           ->with('success', 'Producto eliminado permanentemente.');
-
+                ->with('success', 'Producto eliminado permanentemente.');
         } catch (\Exception $e) {
             return redirect()->back()
-                           ->withErrors(['error' => 'Error al eliminar el producto: ' . $e->getMessage()]);
+                ->withErrors(['error' => 'Error al eliminar el producto: ' . $e->getMessage()]);
         }
     }
 
@@ -168,11 +169,10 @@ class ProductController extends SupportProductController
             $this->clearProductCache();
 
             return redirect()->back()
-                           ->with('success', 'Producto restaurado exitosamente.');
-
+                ->with('success', 'Producto restaurado exitosamente.');
         } catch (\Exception $e) {
             return redirect()->back()
-                           ->withErrors(['error' => 'Error al restaurar el producto: ' . $e->getMessage()]);
+                ->withErrors(['error' => 'Error al restaurar el producto: ' . $e->getMessage()]);
         }
     }
 
@@ -206,7 +206,7 @@ class ProductController extends SupportProductController
                     $productsWithOrders = $products->whereHas('orderItems')->count();
                     if ($productsWithOrders > 0) {
                         return redirect()->back()
-                                       ->withErrors(['error' => 'Algunos productos no se pueden eliminar porque tienen órdenes asociadas.']);
+                            ->withErrors(['error' => 'Algunos productos no se pueden eliminar porque tienen órdenes asociadas.']);
                     }
 
                     $products->delete();
@@ -218,10 +218,9 @@ class ProductController extends SupportProductController
             $this->clearProductCache();
 
             return redirect()->back()->with('success', $message);
-
         } catch (\Exception $e) {
             return redirect()->back()
-                           ->withErrors(['error' => 'Error en la operación masiva: ' . $e->getMessage()]);
+                ->withErrors(['error' => 'Error en la operación masiva: ' . $e->getMessage()]);
         }
     }
 
@@ -245,4 +244,3 @@ class ProductController extends SupportProductController
         return response()->json($stats);
     }
 }
-

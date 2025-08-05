@@ -59,7 +59,6 @@ class AppServiceProvider extends ServiceProvider
             // Warm up order cache
             $orderCache = app(OrderCacheService::class);
             $orderCache->warmUpCache();
-
         } catch (\Exception $e) {
             // Don't fail the application if cache warming fails
             logger()->error('Failed to warm up cache during boot', [
@@ -68,4 +67,3 @@ class AppServiceProvider extends ServiceProvider
         }
     }
 }
-

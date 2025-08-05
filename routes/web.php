@@ -27,11 +27,11 @@ Route::middleware('guest')->group(function () {
     // Login
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
-    
+
     // Register
     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('/register', [RegisterController::class, 'register']);
-    
+
     // Email verification
     Route::get('/email/verify', [VerificationController::class, 'show'])->name('verification.notice');
     Route::post('/email/resend', [VerificationController::class, 'resend'])->name('verification.resend');
@@ -45,27 +45,27 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->midd
 
 // Protected routes (require authentication and email verification)
 Route::middleware(['auth', 'verified'])->group(function () {
-    
+
     // Basic user dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     // Admin routes
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
-        
+
         // User management routes will be added here
         // Product management routes will be added here
         // Order management routes will be added here
     });
-    
+
     // Support routes
     Route::middleware('role:support,admin')->prefix('support')->name('support.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'support'])->name('dashboard');
-        
+
         // Product management routes will be added here
         // Order management routes will be added here
     });
-    
+
     // Basic user routes
     Route::middleware('role:basic,support,admin')->group(function () {
         // Product viewing routes will be added here
@@ -78,4 +78,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified'])->prefix('api')->name('api.')->group(function () {
     // API routes will be added here for AJAX functionality
 });
-

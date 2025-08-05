@@ -14,6 +14,43 @@ class OrderCacheService
     const CACHE_TAG = 'orders';
 
     /**
+     * Clear specific cache patterns.
+     */
+    public function clearCachePattern(string $pattern): void
+    {
+        try {
+            $keys = [
+                self::CACHE_PREFIX . 'active:*',
+                self::CACHE_PREFIX . 'featured:*',
+                self::CACHE_PREFIX . 'category:*',
+                self::CACHE_PREFIX . 'price_range',
+                self::CACHE_PREFIX . 'statistics',
+                self::CACHE_PREFIX . 'search:*',
+                self::CACHE_PREFIX . 'related:*',
+                self::CACHE_PREFIX . 'recent:*',
+                self::CACHE_PREFIX . 'status',
+                self::CACHE_PREFIX . 'status:*',
+                self::CACHE_PREFIX . 'monthly_stats:*',
+                self::CACHE_PREFIX . 'top_customers:*',
+                self::CACHE_PREFIX . 'monthly_stats:*',
+            ];
+
+            foreach ($keys as $key) {
+                if (fnmatch($pattern, $key)) {
+                    Cache::tags([self::CACHE_TAG])->forget($key);
+                }
+            }
+
+            Log::info('Product cache pattern cleared', ['pattern' => $pattern]);
+        } catch (\Exception $e) {
+            Log::error('Failed to clear product cache pattern', [
+                'pattern' => $pattern,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
      * Get order by ID with caching.
      */
     public function getOrder(int $orderId): ?Order
@@ -34,11 +71,11 @@ class OrderCacheService
 
         return Cache::tags([self::CACHE_TAG])->remember($cacheKey, self::CACHE_TTL, function () use ($userId, $limit) {
             return Order::with(['items.product.primaryImage'])
-                       ->where('user_id', $userId)
-                       ->where('status', '!=', 'draft')
-                       ->orderBy('created_at', 'desc')
-                       ->take($limit)
-                       ->get();
+                ->where('user_id', $userId)
+                ->where('status', '!=', 'draft')
+                ->orderBy('created_at', 'desc')
+                ->take($limit)
+                ->get();
         });
     }
 
@@ -51,10 +88,10 @@ class OrderCacheService
 
         return Cache::tags([self::CACHE_TAG])->remember($cacheKey, self::CACHE_TTL, function () use ($limit) {
             return Order::with(['user', 'items'])
-                       ->where('status', '!=', 'draft')
-                       ->orderBy('created_at', 'desc')
-                       ->take($limit)
-                       ->get();
+                ->where('status', '!=', 'draft')
+                ->orderBy('created_at', 'desc')
+                ->take($limit)
+                ->get();
         });
     }
 
@@ -67,10 +104,10 @@ class OrderCacheService
 
         return Cache::tags([self::CACHE_TAG])->remember($cacheKey, self::CACHE_TTL, function () use ($status, $limit) {
             return Order::with(['user', 'items.product'])
-                       ->byStatus($status)
-                       ->orderBy('created_at', 'desc')
-                       ->take($limit)
-                       ->get();
+                ->byStatus($status)
+                ->orderBy('created_at', 'desc')
+                ->take($limit)
+                ->get();
         });
     }
 
@@ -90,11 +127,11 @@ class OrderCacheService
                 'total_revenue' => Order::where('status', '!=', 'draft')->sum('total'),
                 'average_order_value' => Order::where('status', '!=', 'draft')->avg('total'),
                 'orders_today' => Order::where('status', '!=', 'draft')
-                                      ->whereDate('created_at', today())
-                                      ->count(),
+                    ->whereDate('created_at', today())
+                    ->count(),
                 'revenue_today' => Order::where('status', '!=', 'draft')
-                                       ->whereDate('created_at', today())
-                                       ->sum('total'),
+                    ->whereDate('created_at', today())
+                    ->sum('total'),
             ];
         });
     }
@@ -132,13 +169,13 @@ class OrderCacheService
             for ($month = 1; $month <= 12; $month++) {
                 $monthlyStats[$month] = [
                     'orders_count' => Order::where('status', '!=', 'draft')
-                                          ->whereYear('created_at', $year)
-                                          ->whereMonth('created_at', $month)
-                                          ->count(),
+                        ->whereYear('created_at', $year)
+                        ->whereMonth('created_at', $month)
+                        ->count(),
                     'revenue' => Order::where('status', '!=', 'draft')
-                                     ->whereYear('created_at', $year)
-                                     ->whereMonth('created_at', $month)
-                                     ->sum('total'),
+                        ->whereYear('created_at', $year)
+                        ->whereMonth('created_at', $month)
+                        ->sum('total'),
                 ];
             }
 
@@ -155,19 +192,19 @@ class OrderCacheService
 
         return Cache::tags([self::CACHE_TAG])->remember($cacheKey, self::CACHE_TTL, function () use ($limit) {
             return User::withCount(['orders' => function ($query) {
-                           $query->where('status', '!=', 'draft');
-                       }])
-                       ->with(['orders' => function ($query) {
-                           $query->where('status', '!=', 'draft');
-                       }])
-                       ->having('orders_count', '>', 0)
-                       ->orderBy('orders_count', 'desc')
-                       ->take($limit)
-                       ->get()
-                       ->map(function ($user) {
-                           $user->total_spent = $user->orders->sum('total');
-                           return $user;
-                       });
+                $query->where('status', '!=', 'draft');
+            }])
+                ->with(['orders' => function ($query) {
+                    $query->where('status', '!=', 'draft');
+                }])
+                ->having('orders_count', '>', 0)
+                ->orderBy('orders_count', 'desc')
+                ->take($limit)
+                ->get()
+                ->map(function ($user) {
+                    $user->total_spent = $user->orders->sum('total');
+                    return $user;
+                });
         });
     }
 
@@ -180,9 +217,9 @@ class OrderCacheService
 
         return Cache::tags([self::CACHE_TAG])->remember($cacheKey, 600, function () use ($userId) { // 10 minutes for cart
             return Order::with(['items.product.primaryImage'])
-                       ->where('user_id', $userId)
-                       ->where('status', 'draft')
-                       ->first();
+                ->where('user_id', $userId)
+                ->where('status', 'draft')
+                ->first();
         });
     }
 
@@ -192,10 +229,10 @@ class OrderCacheService
     public function cacheOrder(Order $order): void
     {
         $cacheKey = self::CACHE_PREFIX . "single:{$order->id}";
-        
+
         Cache::tags([self::CACHE_TAG])->put(
-            $cacheKey, 
-            $order->load(['items.product.primaryImage', 'user']), 
+            $cacheKey,
+            $order->load(['items.product.primaryImage', 'user']),
             self::CACHE_TTL
         );
     }
@@ -206,7 +243,7 @@ class OrderCacheService
     public function cacheUserCart(int $userId, ?Order $cart): void
     {
         $cacheKey = self::CACHE_PREFIX . "cart:{$userId}";
-        
+
         if ($cart) {
             Cache::tags([self::CACHE_TAG])->put($cacheKey, $cart->load(['items.product.primaryImage']), 600);
         } else {
@@ -293,13 +330,13 @@ class OrderCacheService
         try {
             // Cache recent orders
             $this->getRecentOrders();
-            
+
             // Cache order statistics
             $this->getOrderStatistics();
-            
+
             // Cache monthly statistics for current year
             $this->getMonthlyOrderStatistics();
-            
+
             // Cache top customers
             $this->getTopCustomers();
 
@@ -309,4 +346,3 @@ class OrderCacheService
         }
     }
 }
-

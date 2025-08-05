@@ -22,11 +22,11 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
-        
+
         UserRegistered::class => [
             SendVerificationEmail::class,
         ],
-        
+
         OrderStatusChanged::class => [
             SendOrderStatusEmail::class,
         ],
@@ -48,4 +48,3 @@ class EventServiceProvider extends ServiceProvider
         return false;
     }
 }
-

@@ -39,4 +39,3 @@ class ClearProductCache extends Command
         return Command::SUCCESS;
     }
 }
-

@@ -19,6 +19,7 @@ class CheckRole
             return redirect()->route('login');
         }
 
+        /** @var \App\Models\User $user */
         $user = auth()->user();
 
         // Check if user has any of the required roles
@@ -29,4 +30,3 @@ class CheckRole
         return $next($request);
     }
 }
-

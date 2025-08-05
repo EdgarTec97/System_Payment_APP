@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -73,8 +74,10 @@ class ProductController extends Controller
             $query->orderBy($sortBy, $sortOrder);
         }
 
-        $products = $query->paginate(config('app.pagination_per_page', 15))
-                         ->withQueryString();
+
+        /** @var LengthAwarePaginator $products */
+        $products = $query->paginate(config('app.pagination_per_page', 15));
+        $products->withQueryString();
 
         return view('support.products.index', compact('products'));
     }
@@ -96,8 +99,8 @@ class ProductController extends Controller
 
         if ($validator->fails()) {
             return redirect()->back()
-                           ->withErrors($validator)
-                           ->withInput();
+                ->withErrors($validator)
+                ->withInput();
         }
 
         DB::beginTransaction();
@@ -126,14 +129,13 @@ class ProductController extends Controller
             $this->clearProductCache();
 
             return redirect()->route('support.products.show', $product)
-                           ->with('success', 'Producto creado exitosamente.');
-
+                ->with('success', 'Producto creado exitosamente.');
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return redirect()->back()
-                           ->withErrors(['error' => 'Error al crear el producto: ' . $e->getMessage()])
-                           ->withInput();
+                ->withErrors(['error' => 'Error al crear el producto: ' . $e->getMessage()])
+                ->withInput();
         }
     }
 
@@ -166,8 +168,8 @@ class ProductController extends Controller
 
         if ($validator->fails()) {
             return redirect()->back()
-                           ->withErrors($validator)
-                           ->withInput();
+                ->withErrors($validator)
+                ->withInput();
         }
 
         DB::beginTransaction();
@@ -194,11 +196,11 @@ class ProductController extends Controller
             if ($request->filled('delete_images')) {
                 $imagesToDelete = explode(',', $request->delete_images);
                 ProductImage::whereIn('id', $imagesToDelete)
-                           ->where('product_id', $product->id)
-                           ->get()
-                           ->each(function ($image) {
-                               $image->delete();
-                           });
+                    ->where('product_id', $product->id)
+                    ->get()
+                    ->each(function ($image) {
+                        $image->delete();
+                    });
             }
 
             DB::commit();
@@ -207,14 +209,13 @@ class ProductController extends Controller
             $this->clearProductCache();
 
             return redirect()->route('support.products.show', $product)
-                           ->with('success', 'Producto actualizado exitosamente.');
-
+                ->with('success', 'Producto actualizado exitosamente.');
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return redirect()->back()
-                           ->withErrors(['error' => 'Error al actualizar el producto: ' . $e->getMessage()])
-                           ->withInput();
+                ->withErrors(['error' => 'Error al actualizar el producto: ' . $e->getMessage()])
+                ->withInput();
         }
     }
 
@@ -227,7 +228,7 @@ class ProductController extends Controller
             // Check if product has orders
             if ($product->orderItems()->exists()) {
                 return redirect()->back()
-                               ->withErrors(['error' => 'No se puede eliminar el producto porque tiene órdenes asociadas.']);
+                    ->withErrors(['error' => 'No se puede eliminar el producto porque tiene órdenes asociadas.']);
             }
 
             $product->delete();
@@ -236,11 +237,10 @@ class ProductController extends Controller
             $this->clearProductCache();
 
             return redirect()->route('support.products.index')
-                           ->with('success', 'Producto eliminado exitosamente.');
-
+                ->with('success', 'Producto eliminado exitosamente.');
         } catch (\Exception $e) {
             return redirect()->back()
-                           ->withErrors(['error' => 'Error al eliminar el producto: ' . $e->getMessage()]);
+                ->withErrors(['error' => 'Error al eliminar el producto: ' . $e->getMessage()]);
         }
     }
 
@@ -252,18 +252,18 @@ class ProductController extends Controller
         $product->update(['is_active' => !$product->is_active]);
 
         $status = $product->is_active ? 'activado' : 'desactivado';
-        
+
         // Clear cache
         $this->clearProductCache();
 
         return redirect()->back()
-                       ->with('success', "Producto {$status} exitosamente.");
+            ->with('success', "Producto {$status} exitosamente.");
     }
 
     /**
      * Get a validator for product data.
      */
-    protected function validator(array $data, int $productId = null)
+    protected function validator(array $data, ?int $productId = null)
     {
         $skuRule = 'nullable|string|max:100|unique:products,sku';
         if ($productId) {
@@ -313,7 +313,7 @@ class ProductController extends Controller
             }
 
             $path = $image->store('products', 's3');
-            
+
             ProductImage::create([
                 'product_id' => $product->id,
                 'image_path' => $path,
@@ -333,7 +333,7 @@ class ProductController extends Controller
     {
         $base = Str::upper(Str::slug($title, ''));
         $base = substr($base, 0, 6);
-        
+
         do {
             $sku = $base . rand(1000, 9999);
         } while (Product::where('sku', $sku)->exists());
@@ -350,4 +350,3 @@ class ProductController extends Controller
         Cache::tags(['products'])->flush();
     }
 }
-

@@ -60,8 +60,8 @@ class PaymentController extends Controller
             foreach ($order->items as $item) {
                 // Lock the product row to prevent race conditions
                 $product = Product::where('id', $item->product_id)
-                                 ->lockForUpdate()
-                                 ->first();
+                    ->lockForUpdate()
+                    ->first();
 
                 if (!$product || !$product->isAvailable()) {
                     $stockErrors[] = "El producto '{$item->product_title}' ya no está disponible.";
@@ -105,7 +105,7 @@ class PaymentController extends Controller
             } else {
                 // Create new PaymentIntent
                 $paymentIntent = PaymentIntent::create($paymentIntentData);
-                
+
                 $order->update([
                     'stripe_payment_intent_id' => $paymentIntent->id,
                 ]);
@@ -118,10 +118,9 @@ class PaymentController extends Controller
                 'client_secret' => $paymentIntent->client_secret,
                 'payment_intent_id' => $paymentIntent->id,
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             Log::error('Error creating payment intent', [
                 'order_id' => $order->id,
                 'error' => $e->getMessage(),
@@ -145,7 +144,7 @@ class PaymentController extends Controller
 
         try {
             $paymentIntent = PaymentIntent::retrieve($request->payment_intent_id);
-            
+
             $order = Order::where('stripe_payment_intent_id', $paymentIntent->id)->first();
 
             if (!$order) {
@@ -162,8 +161,8 @@ class PaymentController extends Controller
                     // Reserve stock for all items
                     foreach ($order->items as $item) {
                         $product = Product::where('id', $item->product_id)
-                                         ->lockForUpdate()
-                                         ->first();
+                            ->lockForUpdate()
+                            ->first();
 
                         if ($product && $product->stock >= $item->quantity) {
                             $product->decreaseStock($item->quantity);
@@ -185,7 +184,6 @@ class PaymentController extends Controller
                         'order_number' => $order->order_number,
                         'redirect_url' => route('orders.show', $order),
                     ]);
-
                 } catch (\Exception $e) {
                     DB::rollBack();
                     throw $e;
@@ -196,7 +194,6 @@ class PaymentController extends Controller
                 'success' => false,
                 'message' => 'El pago no fue completado.',
             ], 400);
-
         } catch (\Exception $e) {
             Log::error('Error confirming payment', [
                 'payment_intent_id' => $request->payment_intent_id,
@@ -262,7 +259,7 @@ class PaymentController extends Controller
 
             try {
                 $order->updateStatus('paid');
-                
+
                 Log::info('Payment confirmed via webhook', [
                     'order_id' => $order->id,
                     'payment_intent_id' => $paymentIntent['id'],
@@ -314,4 +311,3 @@ class PaymentController extends Controller
         }
     }
 }
-

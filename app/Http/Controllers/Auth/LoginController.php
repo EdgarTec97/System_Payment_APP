@@ -27,30 +27,31 @@ class LoginController extends Controller
 
         if ($validator->fails()) {
             return redirect()->back()
-                           ->withErrors($validator)
-                           ->withInput($request->only('email', 'remember'));
+                ->withErrors($validator)
+                ->withInput($request->only('email', 'remember'));
         }
 
         $credentials = $request->only('email', 'password');
         $remember = $request->boolean('remember');
 
         if (Auth::attempt($credentials, $remember)) {
+            /** @var \App\Models\User $user */
             $user = Auth::user();
 
             // Check if user is active
             if (!$user->is_active) {
                 Auth::logout();
                 return redirect()->back()
-                               ->withErrors(['email' => 'Tu cuenta está desactivada. Contacta al administrador.'])
-                               ->withInput($request->only('email'));
+                    ->withErrors(['email' => 'Tu cuenta está desactivada. Contacta al administrador.'])
+                    ->withInput($request->only('email'));
             }
 
             // Check if email is verified
             if (!$user->hasVerifiedEmail()) {
                 Auth::logout();
                 return redirect()->back()
-                               ->withErrors(['email' => 'Debes verificar tu email antes de iniciar sesión.'])
-                               ->withInput($request->only('email'));
+                    ->withErrors(['email' => 'Debes verificar tu email antes de iniciar sesión.'])
+                    ->withInput($request->only('email'));
             }
 
             // Update last login information
@@ -62,8 +63,8 @@ class LoginController extends Controller
         }
 
         return redirect()->back()
-                        ->withErrors(['email' => 'Las credenciales no coinciden con nuestros registros.'])
-                        ->withInput($request->only('email'));
+            ->withErrors(['email' => 'Las credenciales no coinciden con nuestros registros.'])
+            ->withInput($request->only('email'));
     }
 
     /**
@@ -77,7 +78,7 @@ class LoginController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('login')
-                        ->with('success', 'Has cerrado sesión exitosamente.');
+            ->with('success', 'Has cerrado sesión exitosamente.');
     }
 
     /**
@@ -109,4 +110,3 @@ class LoginController extends Controller
         }
     }
 }
-

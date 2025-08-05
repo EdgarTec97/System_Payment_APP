@@ -169,13 +169,13 @@ class Order extends Model
     {
         return $query->where(function ($q) use ($search) {
             $q->where('order_number', 'ILIKE', "%{$search}%")
-              ->orWhereHas('user', function ($userQuery) use ($search) {
-                  $userQuery->where('name', 'ILIKE', "%{$search}%")
-                           ->orWhere('email', 'ILIKE', "%{$search}%");
-              })
-              ->orWhereHas('items', function ($itemQuery) use ($search) {
-                  $itemQuery->where('product_title', 'ILIKE', "%{$search}%");
-              });
+                ->orWhereHas('user', function ($userQuery) use ($search) {
+                    $userQuery->where('name', 'ILIKE', "%{$search}%")
+                        ->orWhere('email', 'ILIKE', "%{$search}%");
+                })
+                ->orWhereHas('items', function ($itemQuery) use ($search) {
+                    $itemQuery->where('product_title', 'ILIKE', "%{$search}%");
+                });
         });
     }
 
@@ -244,7 +244,7 @@ class Order extends Model
                 'quantity' => $existingItem->quantity + $quantity,
                 'total_price' => ($existingItem->quantity + $quantity) * $existingItem->unit_price,
             ]);
-            
+
             $this->recalculateTotal();
             return $existingItem;
         }
@@ -278,7 +278,7 @@ class Order extends Model
     public function removeItem(int $itemId): bool
     {
         $item = $this->items()->find($itemId);
-        
+
         if ($item) {
             $item->delete();
             $this->recalculateTotal();
@@ -341,7 +341,7 @@ class Order extends Model
      */
     public function getFormattedTotalAttribute(): string
     {
-        return '$' . number_format($this->total, 2);
+        return '$' . number_format((float)$this->total, 2);
     }
 
     /**
@@ -349,7 +349,7 @@ class Order extends Model
      */
     public function getFormattedSubtotalAttribute(): string
     {
-        return '$' . number_format($this->subtotal, 2);
+        return '$' . number_format((float)$this->subtotal, 2);
     }
 
     /**
@@ -360,4 +360,3 @@ class Order extends Model
         return $this->items()->sum('quantity');
     }
 }
-

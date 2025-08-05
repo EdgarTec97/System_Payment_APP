@@ -25,14 +25,14 @@ class VerificationController extends Controller
 
         if (!$verification) {
             return redirect()->route('login')
-                           ->withErrors(['email' => 'El enlace de verificación es inválido o ha expirado.']);
+                ->withErrors(['email' => 'El enlace de verificación es inválido o ha expirado.']);
         }
 
         $user = $verification->user;
 
         if ($user->hasVerifiedEmail()) {
             return redirect()->route('login')
-                           ->with('success', 'Tu email ya está verificado. Puedes iniciar sesión.');
+                ->with('success', 'Tu email ya está verificado. Puedes iniciar sesión.');
         }
 
         // Mark email as verified
@@ -40,7 +40,7 @@ class VerificationController extends Controller
         $verification->markAsUsed();
 
         return redirect()->route('login')
-                        ->with('success', 'Email verificado exitosamente. Ahora puedes iniciar sesión.');
+            ->with('success', 'Email verificado exitosamente. Ahora puedes iniciar sesión.');
     }
 
     /**
@@ -60,14 +60,14 @@ class VerificationController extends Controller
 
         if ($user->hasVerifiedEmail()) {
             return redirect()->back()
-                           ->withErrors(['email' => 'Este email ya está verificado.']);
+                ->withErrors(['email' => 'Este email ya está verificado.']);
         }
 
         // Invalidate previous verifications
         $user->verifications()
-             ->where('type', 'email')
-             ->where('is_used', false)
-             ->update(['is_used' => true]);
+            ->where('type', 'email')
+            ->where('is_used', false)
+            ->update(['is_used' => true]);
 
         // Create new verification
         $verification = UserVerification::createForUser($user, 'email');
@@ -76,7 +76,6 @@ class VerificationController extends Controller
         event(new \App\Events\UserRegistered($user, $verification));
 
         return redirect()->back()
-                        ->with('success', 'Se ha enviado un nuevo enlace de verificación a tu email.');
+            ->with('success', 'Se ha enviado un nuevo enlace de verificación a tu email.');
     }
 }
-

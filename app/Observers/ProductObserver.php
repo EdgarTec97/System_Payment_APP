@@ -97,7 +97,6 @@ class ProductObserver
                 'action' => $action,
                 'changed_attributes' => $product->getChanges(),
             ]);
-
         } catch (\Exception $e) {
             Log::error('Failed to clear product cache after model change', [
                 'product_id' => $product->id,
@@ -107,4 +106,3 @@ class ProductObserver
         }
     }
 }
-
